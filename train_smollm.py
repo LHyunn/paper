@@ -108,10 +108,10 @@ def main(INIT, TRAINDATAPATH, TRAINDATASET, TESTDATAPATH, TESTDATASET, WORDLIST,
         disable_tqdm=True,
     )
     
-    #model.train(train_data=train_data, save_dir=save_dir, training_args=training_args)
-    #model.save(save_dir)
-    #torch.cuda.empty_cache()
-    model = TableLLM.load_from_dir("/home/hyun/paper/log/20240831213717/model")
+    model.train(train_data=train_data, save_dir=save_dir, training_args=training_args)
+    model.save(save_dir)
+    torch.cuda.empty_cache()
+    #model = TableLLM.load_from_dir("/home/hyun/paper/log/20240831213717/model")
     ############################################################################################################
     # Test
     ############################################################################################################
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     #8개 GPU를 하나씩 할당. 병렬로 main 함수 실행
     for i, train_set in enumerate(TRAIN_SET):
         i = i % 7
-        if i == 0:
+        if i ==7:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(i)
             INIT = (datetime.now() + timedelta(hours=9)).strftime('%Y%m%d%H%M%S')
             main(INIT, *train_set)
