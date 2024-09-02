@@ -7,16 +7,16 @@ STRUCTURE = "KEY is VALUE"
 DELIMITER = ", "
 CONNECTOR = " is "
 
-def get_unique_word(df: pd.DataFrame, column: list):
+def get_unique_word(df: pd.DataFrame, x_columns: list, y_column: str) -> list:
     """
     Get unique words from the given column
     """
     word_list = []
     
-    for col in column:
+    for col in x_columns:
         word_list.extend(df[col].unique())
-    column.append("result is ")
-    word_list.extend(column)
+    word_list.extend(x_columns)
+    word_list.extend(y_column)
     return list(set(word_list))
     
 def transform_row_to_sentense(row: pd.Series, impute: bool = False) -> str:

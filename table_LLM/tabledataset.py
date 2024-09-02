@@ -42,7 +42,9 @@ class TableDataset(Dataset):
             f"{column_names[i]}{self.connector}{str(values[i]).strip()}"
             for i in idx
         ]
-        ) + self.eos_token
+        )
+        print(text)
+        text += self.eos_token
         
         tokenized_text = self.tokenizer(text, padding=True)
         return tokenized_text
@@ -55,6 +57,65 @@ class TableDataset(Dataset):
         
     def get_sample(self, key: tp.Union[int, slice, str]):
         return self.tokenizer.decode(self._getitem(key)["input_ids"], skip_special_tokens=False)
+    
+
+class TableDataset_v2(Dataset):
+    def _init_structure(self):
+        self.structure = STRUCTURE
+        self.key = STRUCTURE.split(CONNECTOR)[0]
+        self.value = STRUCTURE.split(CONNECTOR)[1]
+        self.connector = CONNECTOR
+        self.delimiter = DELIMITER
+        self.eos_token = self.tokenizer.eos_token
+        self.pad_token_idx = self.tokenizer.pad_token_idx
+
+
+    def get_data(self):
+        return self._data
+    
+    def set_length(self, max_length: int):
+        self.max_length = max_length
+
+
+    def set_tokenizer(self, tokenizer):
+        self.tokenizer = tokenizer
+        self._init_structure()
+
+
+    def set_generate_mode(self, mode: str):
+        self.generate_mode = mode
+
+
+    def _getitem(self, key: tp.Union[int, slice, str]) -> tp.Union[tp.Dict, tp.List]:
+        row = self._data.fast_slice(key, 1)
+        idx = list(range(row.num_columns))
+        
+        random.shuffle(idx)
+        text = DELIMITER.join(
+        [
+            f"{row.column_names[i]}{self.connector}{str(row.columns[i].to_pylist()[0]).strip()}"
+            for i in idx
+        ]
+        ) + self.eos_token
+        
+        tokenized_text = self.tokenizer(text)
+        tokenized_text = np.pad(
+            tokenized_text,
+            (0, self.max_length - len(tokenized_text)),
+            mode="constant",
+            constant_values=self.tokenizer.pad_token_idx,
+        )
+        return tokenized_text
+
+    def __getitems__(self, keys: tp.Union[int, slice, str, list]):
+        if isinstance(keys, list):
+            return [self._getitem(key) for key in keys]
+        else:
+            return self._getitem(keys)
+        
+    def get_sample(self, key: tp.Union[int, slice, str]):
+        return self.tokenizer.decode(self._getitem(key))
+    
     
 
 @dataclass

@@ -209,7 +209,7 @@ if __name__ == "__main__":
     #8개 GPU를 하나씩 할당. 병렬로 main 함수 실행
     for i, train_set in enumerate(TRAIN_SET):
         i = i % 7
-        if i ==7:
+        if i ==6:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(i)
             INIT = (datetime.now() + timedelta(hours=9)).strftime('%Y%m%d%H%M%S')
             main(INIT, *train_set)
