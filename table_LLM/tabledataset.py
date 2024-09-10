@@ -99,11 +99,17 @@ class TableDataset_v2(Dataset):
         ) + self.eos_token
         
         tokenized_text = self.tokenizer(text)
-        tokenized_text = np.pad(
-            tokenized_text,
-            (0, self.max_length - len(tokenized_text)),
+        tokenized_text["input_ids"] = np.pad(
+            tokenized_text["input_ids"],
+            (0, self.max_length - len(tokenized_text["input_ids"])),
             mode="constant",
-            constant_values=self.tokenizer.pad_token_idx,
+            constant_values=self.pad_token_idx,
+        )
+        tokenized_text["token_type"] = np.pad(
+            tokenized_text["token_type"],
+            (0, self.max_length - len(tokenized_text["token_type"])),
+            mode="constant",
+            constant_values=0,
         )
         return tokenized_text
 
@@ -114,7 +120,7 @@ class TableDataset_v2(Dataset):
             return self._getitem(keys)
         
     def get_sample(self, key: tp.Union[int, slice, str]):
-        return self.tokenizer.decode(self._getitem(key))
+        return self.tokenizer.decode(self._getitem(key)["input_ids"])
     
     
 
